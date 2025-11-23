@@ -1,11 +1,11 @@
 # ==========================================
-# 1. MODO DISTRIBUIDO (Multipes VMs)
+# 1. MODO DISTRIBUIDO (Multiples VMs)
 # ==========================================
 # Configura estas IPs si usas 4 máquinas distintas
-VM1_IP=192.168.1.10
-VM2_IP=192.168.1.11
-VM3_IP=192.168.1.12
-VM_COORD_IP=192.168.1.20
+VM1_IP=10.35.168.88			#dist078: Datanode 1
+VM2_IP=10.35.168.89 		#dist079: Datanode 2
+VM3_IP=10.35.168.90			#dist080: Datanode 3
+VM_COORD_IP=10.35.168.112	#dist102: Coordinador
 
 # En distribuido, todos pueden usar el mismo puerto pq son distintas IPs
 PORT_DIST=50051

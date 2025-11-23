@@ -10,7 +10,7 @@ Make: Para la automatización de tareas.
 
 Compilador Protocol Buffers (protoc):
 
-Bash
+ 
 
 # Ubuntu/Debian
 ```
@@ -29,7 +29,7 @@ Asegúrate de que $GOPATH/bin esté en tu $PATH.
 Paso 1.1: Descargar dependencias
 En la raíz del proyecto, ejecuta:
 
-Bash
+ 
 
 ```
 go mod tidy
@@ -66,7 +66,7 @@ VM_COORD_IP=192.168.1.20 # IP para el Coordinador
 # 2. Compilación
 Este paso genera los binarios en la carpeta bin/ y el código de gRPC en proto/. Ejecuta este comando (en todas las máquinas si es distribuido):
 
-Bash
+ 
 ```
 make build
 ```
@@ -78,65 +78,65 @@ Necesitarás abrir 5 terminales diferentes en la raíz del proyecto.
 
 Terminal 1 (DataNode 1):
 
-Bash
+ 
 ```
 make run-local-node-1
 ```
 Terminal 2 (DataNode 2):
 
-Bash
+ 
 ```
 make run-local-node-2
 ```
 Terminal 3 (DataNode 3):
 
-Bash
+ 
 
 ```
 make run-local-node-3
 ```
 Terminal 4 (Coordinador):
 
-Bash
+ 
 ```
 make run-local-coord
 ```
 Terminal 5 (Cliente):
 
-Bash
+
 ```
 make run-local-client
 ```
-Guía para MODO DISTRIBUIDO (4 VMs)
+# Guía para MODO DISTRIBUIDO (4 VMs)
 Ejecuta el comando correspondiente en cada máquina virtual según su rol.
 
 En la Máquina 1 (DataNode 1):
 
-Bash
+ 
 ```
 make run-dist-node-1
 En la Máquina 2 (DataNode 2):
 ```
 
-Bash
+ 
 ```
 make run-dist-node-2
 ```
 En la Máquina 3 (DataNode 3):
 
-Bash
+ 
 ```
 make run-dist-node-3
 ```
 En la Máquina 4 (Coordinador): Asegúrate de que los DataNodes ya estén corriendo.
 
-Bash
+ 
 ```
 make run-dist-coord
 ```
 Cliente (Cualquier máquina con acceso al Coordinador):
 
-Bash
+ 
 ```
 make run-dist-client
 ```
@@ -160,7 +160,7 @@ Consistencia Monotonic Reads: El cliente verificará si la versión del dato (Re
 Limpieza
 Para borrar los binarios y archivos generados por protobuf:
 
-Bash
+ 
 ```
 make clean
 ```

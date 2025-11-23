@@ -20,7 +20,7 @@ COORD_ADDR_DIST=$(VM_COORD_IP):$(PORT_COORD_DIST)
 # ==========================================
 # 2. MODO LOCAL (Una sola máquina, N terminales)
 # ==========================================
-LOCAL_HOST=172.22.87.38
+LOCAL_HOST=172.192.168.1
 # Puertos diferentes para evitar choques en localhost
 PORT_L_1=50051
 PORT_L_2=50052
@@ -80,15 +80,21 @@ run-dist-client: build
 # ==========================================
 run-local-node-1: build
 	@echo "--- MODO LOCAL: DataNode 1 (Puerto $(PORT_L_1)) ---"
-	NODE_ID="node1" PORT="$(PORT_L_1)" PEERS="$(PEERS_LOCAL_1)" ./bin/datanode
+	# ANTES: NODE_ID="node1" ...
+	# AHORA:
+	NODE_ID="$(LOCAL_HOST):$(PORT_L_1)" PORT="$(PORT_L_1)" PEERS="$(PEERS_LOCAL_1)" ./bin/datanode
 
 run-local-node-2: build
 	@echo "--- MODO LOCAL: DataNode 2 (Puerto $(PORT_L_2)) ---"
-	NODE_ID="node2" PORT="$(PORT_L_2)" PEERS="$(PEERS_LOCAL_2)" ./bin/datanode
+	# ANTES: NODE_ID="node2" ...
+	# AHORA:
+	NODE_ID="$(LOCAL_HOST):$(PORT_L_2)" PORT="$(PORT_L_2)" PEERS="$(PEERS_LOCAL_2)" ./bin/datanode
 
 run-local-node-3: build
 	@echo "--- MODO LOCAL: DataNode 3 (Puerto $(PORT_L_3)) ---"
-	NODE_ID="node3" PORT="$(PORT_L_3)" PEERS="$(PEERS_LOCAL_3)" ./bin/datanode
+	# ANTES: NODE_ID="node3" ...
+	# AHORA:
+	NODE_ID="$(LOCAL_HOST):$(PORT_L_3)" PORT="$(PORT_L_3)" PEERS="$(PEERS_LOCAL_3)" ./bin/datanode
 
 run-local-coord: build
 	@echo "--- MODO LOCAL: Coordinador (Puerto $(PORT_L_COORD)) ---"

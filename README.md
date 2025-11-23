@@ -1,4 +1,5 @@
-Proyecto Sistemas Distribuidos: Plataforma de Micro-Reseñas
+# Proyecto Sistemas Distribuidos: Plataforma de Micro-Reseñas
+
 Integrantes: 
 
 -Vicente Luongo ROL 202073637-5 
@@ -6,8 +7,6 @@ Integrantes:
 -Esteban ROL 
 
 -Antonio ROL
-
-# Proyecto Sistemas Distribuidos: Plataforma de Micro-Reseñas
 
 Este sistema implementa una arquitectura distribuida que soporta **Consistencia Eventual** (entre DataNodes) y los modelos **Read Your Writes / Monotonic Reads** (para el Cliente), desarrollado en Go utilizando gRPC.
 

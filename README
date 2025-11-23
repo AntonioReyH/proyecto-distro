@@ -1,94 +1,112 @@
-Instrucciones de Ejecución en VMs Distintas
-Para cumplir con el requisito de ejecutarse en simultáneo en diferentes máquinas virtuales, debes configurar las variables de entorno al ejecutar el contenedor (o el binario) en cada VM.
+README - Despliegue Proyecto Sistemas Distribuidos
+Este documento detalla los pasos para compilar, configurar y ejecutar el sistema de Micro-Reseñas Distribuido en 4 Máquinas Virtuales (VMs) diferentes, partiendo desde cero (código fuente).
 
-Supongamos 4 VMs con las siguientes IPs (ejemplo):
+1. Instalación de Dependencias (En todas las máquinas)
+Antes de compilar, cada máquina virtual necesita tener instalado Go y el compilador de Protocol Buffers. Ejecuta los siguientes comandos en la terminal de cada VM:
 
-VM1 (Datanode 1): 192.168.1.10
+A. Actualizar sistema e instalar Go y Make
+Bash
 
-VM2 (Datanode 2): 192.168.1.11
-
-VM3 (Datanode 3): 192.168.1.12
-
-VM4 (Coordinador): 192.168.1.20
-
-Paso 1: Ejecutar Datanodes (Consistencia Eventual)
-En VM1:
+sudo apt update
+sudo apt install -y golang-go make protobuf-compiler
+B. Instalar plugins de Go para Protobuf
+Estos plugins son necesarios para que el código .proto se convierta en código Go.
 
 Bash
 
-# ID es el identificador lógico, PEERS son las direcciones de los otros nodos
-docker run -e NODE_ID="node1" -e PORT="50051" -e PEERS="192.168.1.11:50051,192.168.1.12:50051" -p 50051:50051 proyecto-sd ./datanode
-En VM2:
+# Instalar plugins
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# ¡IMPORTANTE! Asegurar que los plugins estén en el PATH
+export PATH="$PATH:$(go env GOPATH)/bin"
+(Nota: Si cierras la terminal, es posible que tengas que ejecutar la línea export nuevamente o agregarla a tu ~/.bashrc).
+
+2. Configuración de Red (Solo una vez)
+Debes indicarle al sistema cuáles son las IPs reales de tus máquinas virtuales.
+
+Abre el archivo Makefile con un editor de texto (ej. nano Makefile o vim Makefile).
+
+Al principio del archivo, encontrarás la sección de configuración. Edita las siguientes líneas con las IPs actuales de tus VMs:
+
+Makefile
+
+# ==========================================
+# CONFIGURACIÓN DE RED (VARIABLES DE ENTORNO)
+# ==========================================
+
+VM1_IP=192.168.1.10   <-- Cambia esto por la IP de tu VM 1
+VM2_IP=192.168.1.11   <-- Cambia esto por la IP de tu VM 2
+VM3_IP=192.168.1.12   <-- Cambia esto por la IP de tu VM 3
+VM_COORD_IP=192.168.1.20 <-- Cambia esto por la IP de tu VM 4 (Coordinador)
+Guarda los cambios y asegúrate de que todas las máquinas tengan la misma versión del Makefile (puedes editarlo en una y copiarlo a las demás, o editarlo manualmente en cada una).
+
+3. Compilación del Proyecto
+Una vez instaladas las dependencias y configuradas las IPs, compila el proyecto. Ejecuta esto en la carpeta raíz del proyecto (proyecto-sd/):
 
 Bash
 
-docker run -e NODE_ID="node2" -e PORT="50051" -e PEERS="192.168.1.10:50051,192.168.1.12:50051" -p 50051:50051 proyecto-sd ./datanode
-En VM3:
+# 1. Descargar librerías del proyecto
+go mod tidy
 
-Bash
+# 2. Generar código gRPC y compilar binarios
+make build
+Si todo sale bien, verás una carpeta bin/ con los ejecutables (datanode, coordinator, client).
 
-docker run -e NODE_ID="node3" -e PORT="50051" -e PEERS="192.168.1.10:50051,192.168.1.11:50051" -p 50051:50051 proyecto-sd ./datanode
-Paso 2: Ejecutar Coordinador (Broker Central)
-El coordinador necesita saber dónde están todos los datanodes. Nota: Para que RYW funcione con IPs, el código del Coordinador en la sección CreateReview deberá retornar la dirección IP (ej. 192.168.1.10:50051) en el campo WrittenAtNode en lugar de solo el nombre lógico, o tener un mapa interno. Para simplificar el despliegue, usa la IP directamente en la configuración.
+4. Ejecución del Sistema
+Cada máquina virtual debe ejecutar un comando específico dependiendo del rol que va a cumplir.
 
-En VM4:
-
-Bash
-
-docker run -e DATANODES="192.168.1.10:50051,192.168.1.11:50051,192.168.1.12:50051" -p 50050:50050 proyecto-sd ./coordinator
-Paso 3: Ejecutar Cliente
-En tu máquina local o cualquier VM:
-
-Bash
-
-docker run -it -e COORDINATOR_ADDR="192.168.1.20:50050" proyecto-sd ./client
-Resumen de cumplimiento de requisitos
-Go, gRPC, Protobuf, Docker: Utilizados en todo el stack.
-
-
-Read Your Writes: El Coordinador devuelve la dirección del nodo donde se escribió (WrittenAtNode), y el cliente envía esa dirección (PreferredNode) en la lectura siguiente.
-
-
-Monotonic Reads: El cliente guarda maxSeenClock y lo envía en ReadRequest. El Datanode verifica IsAfter.
-
-
-Consistencia Eventual: Los datanodes usan broadcastReplication asíncrono y MergeClocks para converger.
-
-VMs e IPs diferentes: Configurable mediante variables de entorno (PEERS, DATANODES).
-
------*----------------
-
-Cómo utilizar este Makefile en tu despliegue
-Edita las IPs: Abre el Makefile y cambia los valores de VM1_IP, VM2_IP, etc., por las IPs reales que tienen tus máquinas virtuales en ese momento.
-
-Distribuye el código: Asegúrate de que este mismo Makefile (y el resto del código) esté presente en todas las máquinas.
-
-Ejecuta según la máquina:
-
-En la VM 1 (DataNode 1):
+Máquina Virtual 1 (DataNode 1)
+En la terminal de la VM 1:
 
 Bash
 
 make run-node-1
-En la VM 2 (DataNode 2):
+Máquina Virtual 2 (DataNode 2)
+En la terminal de la VM 2:
 
 Bash
 
 make run-node-2
-En la VM 3 (DataNode 3):
+Máquina Virtual 3 (DataNode 3)
+En la terminal de la VM 3:
 
 Bash
 
 make run-node-3
-En la VM 4 (Coordinador):
+Máquina Virtual 4 (Coordinador)
+En la terminal de la VM 4 (asegúrate de que los DataNodes ya estén corriendo o levántalos simultáneamente):
 
 Bash
 
 make run-coord
-Para probar el cliente:
+5. Uso del Cliente
+Para probar el sistema, puedes correr el cliente desde cualquiera de las máquinas (o desde tu computador local si tienes acceso a la red de las VMs).
 
 Bash
 
 make run-client
-De esta forma, la lógica de conexión (quién conecta con quién) queda centralizada en el archivo y no tienes que recordarla al momento de ejecutar.
+Sigue las instrucciones en pantalla:
 
+Opción 1: Escribir una reseña (Se probará Read Your Writes).
+
+Opción 2: Leer reseña (Se verificará Monotonic Reads y se mostrará el reloj vectorial).
+
+6. Solución de Problemas Comunes
+Error: protoc-gen-go: program not found or is not executable:
+
+Significa que el sistema no encuentra los plugins instalados.
+
+Solución: Ejecuta de nuevo: export PATH="$PATH:$(go env GOPATH)/bin".
+
+Error de Conexión / Timeouts:
+
+Si las máquinas no se ven entre sí, revisa el Firewall.
+
+Solución rápida (solo para pruebas): Permite el tráfico en los puertos usados o deshabilita el firewall temporalmente (sudo ufw disable en Ubuntu, o abrir puertos 50050-50053).
+
+Error: bind: address already in use:
+
+Ya hay un proceso corriendo en ese puerto.
+
+Solución: Cierra la terminal donde corre el nodo anterior o usa killall datanode / killall coordinator.

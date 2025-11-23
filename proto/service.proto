@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto";
+
+// El reloj vectorial es un mapa de ID_Nodo -> Contador
+message VectorClock {
+    map<string, int64> versions = 1;
+}
+
+message Review {
+    string id = 1;
+    string content = 2;
+    VectorClock clock = 3;
+    int64 timestamp = 4; // Para desempate (Last Writer Wins)
+}
+
+// Request/Response para Escritura
+message WriteRequest {
+    string content = 1;
+    string client_id = 2;
+}
+
+message WriteResponse {
+    string review_id = 1;
+    string written_at_node = 2; // Para RYW: saber dónde se escribió
+}
+
+// Request/Response para Lectura
+message ReadRequest {
+    string review_id = 1;
+    string preferred_node = 2; // Para RYW: intentar leer de aquí
+    VectorClock min_clock = 3; // Para Monotonic: no aceptar menos que esto
+}
+
+message ReadResponse {
+    Review review = 1;
+    string source_node = 2;
+}
+
+// Replicación entre Datanodes
+message ReplicateRequest {
+    Review review = 1;
+    string sender_node_id = 2;
+}
+
+message Empty {}
+
+service DistributedService {
+    // Cliente -> Coordinador
+    rpc CreateReview(WriteRequest) returns (WriteResponse);
+    rpc GetReview(ReadRequest) returns (ReadResponse);
+
+    // Coordinador -> Datanode (o Cliente -> Datanode indirecto)
+    rpc WriteData(WriteRequest) returns (WriteResponse);
+    rpc ReadData(ReadRequest) returns (ReadResponse);
+
+    // Datanode -> Datanode
+    rpc Replicate(ReplicateRequest) returns (Empty);
+}

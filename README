@@ -1,0 +1,94 @@
+Instrucciones de Ejecución en VMs Distintas
+Para cumplir con el requisito de ejecutarse en simultáneo en diferentes máquinas virtuales, debes configurar las variables de entorno al ejecutar el contenedor (o el binario) en cada VM.
+
+Supongamos 4 VMs con las siguientes IPs (ejemplo):
+
+VM1 (Datanode 1): 192.168.1.10
+
+VM2 (Datanode 2): 192.168.1.11
+
+VM3 (Datanode 3): 192.168.1.12
+
+VM4 (Coordinador): 192.168.1.20
+
+Paso 1: Ejecutar Datanodes (Consistencia Eventual)
+En VM1:
+
+Bash
+
+# ID es el identificador lógico, PEERS son las direcciones de los otros nodos
+docker run -e NODE_ID="node1" -e PORT="50051" -e PEERS="192.168.1.11:50051,192.168.1.12:50051" -p 50051:50051 proyecto-sd ./datanode
+En VM2:
+
+Bash
+
+docker run -e NODE_ID="node2" -e PORT="50051" -e PEERS="192.168.1.10:50051,192.168.1.12:50051" -p 50051:50051 proyecto-sd ./datanode
+En VM3:
+
+Bash
+
+docker run -e NODE_ID="node3" -e PORT="50051" -e PEERS="192.168.1.10:50051,192.168.1.11:50051" -p 50051:50051 proyecto-sd ./datanode
+Paso 2: Ejecutar Coordinador (Broker Central)
+El coordinador necesita saber dónde están todos los datanodes. Nota: Para que RYW funcione con IPs, el código del Coordinador en la sección CreateReview deberá retornar la dirección IP (ej. 192.168.1.10:50051) en el campo WrittenAtNode en lugar de solo el nombre lógico, o tener un mapa interno. Para simplificar el despliegue, usa la IP directamente en la configuración.
+
+En VM4:
+
+Bash
+
+docker run -e DATANODES="192.168.1.10:50051,192.168.1.11:50051,192.168.1.12:50051" -p 50050:50050 proyecto-sd ./coordinator
+Paso 3: Ejecutar Cliente
+En tu máquina local o cualquier VM:
+
+Bash
+
+docker run -it -e COORDINATOR_ADDR="192.168.1.20:50050" proyecto-sd ./client
+Resumen de cumplimiento de requisitos
+Go, gRPC, Protobuf, Docker: Utilizados en todo el stack.
+
+
+Read Your Writes: El Coordinador devuelve la dirección del nodo donde se escribió (WrittenAtNode), y el cliente envía esa dirección (PreferredNode) en la lectura siguiente.
+
+
+Monotonic Reads: El cliente guarda maxSeenClock y lo envía en ReadRequest. El Datanode verifica IsAfter.
+
+
+Consistencia Eventual: Los datanodes usan broadcastReplication asíncrono y MergeClocks para converger.
+
+VMs e IPs diferentes: Configurable mediante variables de entorno (PEERS, DATANODES).
+
+-----*----------------
+
+Cómo utilizar este Makefile en tu despliegue
+Edita las IPs: Abre el Makefile y cambia los valores de VM1_IP, VM2_IP, etc., por las IPs reales que tienen tus máquinas virtuales en ese momento.
+
+Distribuye el código: Asegúrate de que este mismo Makefile (y el resto del código) esté presente en todas las máquinas.
+
+Ejecuta según la máquina:
+
+En la VM 1 (DataNode 1):
+
+Bash
+
+make run-node-1
+En la VM 2 (DataNode 2):
+
+Bash
+
+make run-node-2
+En la VM 3 (DataNode 3):
+
+Bash
+
+make run-node-3
+En la VM 4 (Coordinador):
+
+Bash
+
+make run-coord
+Para probar el cliente:
+
+Bash
+
+make run-client
+De esta forma, la lógica de conexión (quién conecta con quién) queda centralizada en el archivo y no tienes que recordarla al momento de ejecutar.
+

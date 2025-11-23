@@ -1,12 +1,24 @@
 FROM golang:1.22 AS builder
+
 WORKDIR /app
-COPY . .
+
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Build arguments para construir diferentes binarios
-ARG SERVICE_NAME
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app ./cmd/${SERVICE_NAME}
+COPY . .
+
+# Instalar compilador de protobuf si no se generan localmente, 
+# pero mejor usar el makefile local y copiar los .go generados.
+# Asumiremos que ejecutas 'make gen' antes de docker build o que copiamos todo.
+RUN go build -o /bin/datanode datanode/main.go
+RUN go build -o /bin/coordinator coordinator/main.go
+RUN go build -o /bin/client client/main.go
 
 FROM alpine:latest
-COPY --from=builder /bin/app /app
-ENTRYPOINT ["/app"]
+WORKDIR /root/
+COPY --from=builder /bin/datanode .
+COPY --from=builder /bin/coordinator .
+COPY --from=builder /bin/client .
+
+# Exponemos puertos típicos
+EXPOSE 50051 50052 50053 50050

@@ -3,10 +3,10 @@
 # ==========================================
 
 # Edita estas IPs con las direcciones reales de tus 4 Máquinas Virtuales
-VM1_IP=192.168.1.10
-VM2_IP=192.168.1.11
-VM3_IP=192.168.1.12
-VM_COORD_IP=192.168.1.20
+VM1_IP=172.22.87.38
+VM2_IP=172.22.87.38
+VM3_IP=172.22.87.38
+VM_COORD_IP=172.22.87.38
 
 # Puertos (Pueden ser el mismo si están en máquinas distintas)
 PORT_DN=50051

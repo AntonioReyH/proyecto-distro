@@ -16,28 +16,6 @@ Ejecuta los siguientes comandos en la terminal de todas las VMs (asumiendo Ubunt
 
 Bash
 
-# 1. Actualizar repositorios
-sudo apt-get update
-
-# 2. Instalar Go (Golang) y Make
-sudo apt-get install -y golang-go make
-
-# 3. Instalar el compilador de Protocol Buffers
-sudo apt-get install -y protobuf-compiler
-
-# 4. Instalar plugins de Go para Protobuf y gRPC
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-
-# 5. Asegurar que los binarios de Go estén en el PATH
-export PATH="$PATH:$(go env GOPATH)/bin"
-2. Inicialización del Proyecto
-Si acabas de copiar y pegar el código en la carpeta, es probable que necesites inicializar el módulo de Go y descargar las dependencias.
-
-Ejecuta esto en la carpeta raíz del proyecto (proyecto-sd/):
-
-Bash
-
 # Inicializar dependencias
 go mod tidy
 3. Configuración de Red (IMPORTANTE)

@@ -71,15 +71,15 @@ clean:
 # ==========================================
 run-dist-node-1: build
 	@echo "--- MODO DISTRIBUIDO: DataNode 1 ---"
-	NODE_ID="node1" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_1)" ./bin/datanode
+	NODE_ID="$(VM1_IP):$(PORT_DIST)" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_1)" ./bin/datanode
 
 run-dist-node-2: build
 	@echo "--- MODO DISTRIBUIDO: DataNode 2 ---"
-	NODE_ID="node2" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_2)" ./bin/datanode
+	NODE_ID="$(VM2_IP):$(PORT_DIST)" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_1)" ./bin/datanode
 
 run-dist-node-3: build
 	@echo "--- MODO DISTRIBUIDO: DataNode 3 ---"
-	NODE_ID="node3" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_3)" ./bin/datanode
+	NODE_ID="$(VM3_IP):$(PORT_DIST)" PORT="$(PORT_DIST)" PEERS="$(PEERS_DIST_1)" ./bin/datanode
 
 run-dist-coord: build
 	@echo "--- MODO DISTRIBUIDO: Coordinador ---"

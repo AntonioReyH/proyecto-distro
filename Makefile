@@ -22,6 +22,14 @@ ALL_DATANODES_DIST=$(VM1_IP):$(PORT_DIST),$(VM2_IP):$(PORT_DIST),$(VM3_IP):$(POR
 COORD_ADDR_DIST=$(VM_COORD_IP):$(PORT_COORD_DIST)
 
 # ==========================================
+# CONFIGURACIÓN DE ENTORNOS FIJA PARA PROTOC
+# Usa rutas absolutas para no depender del $PATH del usuario.
+# ==========================================
+GOPATH_BIN_DIR=/home/dist/go/bin
+PROTOC_GO_PLUGIN=$(GOPATH_BIN_DIR)/protoc-gen-go
+PROTOC_GRPC_PLUGIN=$(GOPATH_BIN_DIR)/protoc-gen-go-grpc
+
+# ==========================================
 # 2. MODO LOCAL (Una sola máquina, N terminales)
 # ==========================================
 LOCAL_HOST=172.192.168.1
@@ -42,8 +50,11 @@ COORD_ADDR_LOCAL=$(LOCAL_HOST):$(PORT_L_COORD)
 # COMANDOS DE COMPILACIÓN (Comunes)
 # ==========================================
 gen:
-	protoc --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	protoc \
+    --plugin=protoc-gen-go=$(PROTOC_GO_PLUGIN) \
+    --go_out=. --go_opt=paths=source_relative \
+    --plugin=protoc-gen-go-grpc=$(PROTOC_GRPC_PLUGIN) \
+    --go-grpc_out=. --go-grpc-opt=paths=source_relative \
     proto/service.proto
 
 build: gen

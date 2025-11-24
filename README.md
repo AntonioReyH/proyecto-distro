@@ -119,31 +119,32 @@ make run-local-client
 # Guía para MODO DISTRIBUIDO (4 VMs)
 Ejecuta el comando correspondiente en cada máquina virtual según su rol.
 
-En la Máquina 1 (DataNode 1):
+En dist078 (DataNode 1):
 
  
 ```
 make run-dist-node-1
-En la Máquina 2 (DataNode 2):
+En dist079 (DataNode 2):
 ```
 
  
 ```
 make run-dist-node-2
 ```
-En la Máquina 3 (DataNode 3):
+En dist080 (DataNode 3):
 
  
 ```
 make run-dist-node-3
 ```
-En la Máquina 4 (Coordinador): Asegúrate de que los DataNodes ya estén corriendo.
+En dist102 (Coordinador): Asegúrate de que los DataNodes ya estén corriendo.
 
  
 ```
 make run-dist-coord
 ```
-Cliente (Cualquier máquina con acceso al Coordinador):
+Cliente (Cualquier máquina con acceso al Coordinador),
+En nuestro caso lo ejecutamos en la dist078:
 
  
 ```

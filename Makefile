@@ -54,7 +54,7 @@ gen:
     --plugin=protoc-gen-go=$(PROTOC_GO_PLUGIN) \
     --go_out=. --go_opt=paths=source_relative \
     --plugin=protoc-gen-go-grpc=$(PROTOC_GRPC_PLUGIN) \
-    --go-grpc_out=. --go-grpc-opt=paths=source_relative \
+    --go-grpc_out=. \
     proto/service.proto
 
 build: gen
